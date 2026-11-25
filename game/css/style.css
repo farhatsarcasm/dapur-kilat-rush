@@ -1,0 +1,26 @@
+/* Dapur Kilat — page chrome around the canvas. The game itself draws
+   everything on the canvas; this file only centers it and keeps the page
+   quiet. No external fonts, no external files of any kind. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #3e2723; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #fff8e1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrap { padding: 12px; text-align: center; }
+canvas {
+  display: block;
+  max-width: min(1280px, 96vw);
+  max-height: calc(96vh - 48px);
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.hint { margin: 10px 0 0; font-size: 13px; color: #d7ccc8; }
