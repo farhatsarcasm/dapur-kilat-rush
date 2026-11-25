@@ -1,4 +1,4 @@
-/* Dapur Kilat — page chrome around the canvas. The game itself draws
+/* The Last Wok — page chrome around the canvas. The game itself draws
    everything on the canvas; this file only centers it and keeps the page
    quiet. No external fonts, no external files of any kind. */
 * { box-sizing: border-box; }
@@ -22,5 +22,6 @@ canvas {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
   cursor: pointer;
   touch-action: manipulation;
+  image-rendering: pixelated;
 }
 .hint { margin: 10px 0 0; font-size: 13px; color: #d7ccc8; }

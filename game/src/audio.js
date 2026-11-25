@@ -1,4 +1,4 @@
-// Dapur Kilat — sound effects, synthesized with WebAudio only.
+// The Last Wok — sound effects, synthesized with WebAudio only.
 // No audio files, no network requests: every sound is generated here.
 
 let audioContext = null;
@@ -6,6 +6,49 @@ let muted = false;
 
 export function setMuted(value) {
   muted = value;
+  if (rainGain && audioContext) {
+    rainGain.gain.setTargetAtTime(muted || !rainOn ? 0 : 0.045, audioContext.currentTime, 0.5);
+  }
+}
+
+// Rain: a soft looping patter for rainy days, plus a calmer evening
+// mood — the melody plays half as often and quieter while it rains,
+// so the whole scene gets quieter and calmer. Mute silences it all.
+let rainSource = null;
+let rainGain = null;
+let rainOn = false;
+
+function ensureRain() {
+  if (rainSource || !audioContext) return;
+  const ctx = audioContext;
+  const length = ctx.sampleRate * 2;
+  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < length; i++) {
+    // Soft brown-ish noise: gentle patter, never harsh.
+    const white = Math.random() * 2 - 1;
+    last = (last + 0.02 * white) / 1.02;
+    data[i] = last * 3;
+  }
+  rainSource = ctx.createBufferSource();
+  rainSource.buffer = buffer;
+  rainSource.loop = true;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 900;
+  rainGain = ctx.createGain();
+  rainGain.gain.value = 0;
+  rainSource.connect(filter).connect(rainGain).connect(ctx.destination);
+  rainSource.start();
+}
+
+export function setRain(on) {
+  rainOn = on;
+  if (!on && !rainSource) return;
+  ensureRain();
+  if (!rainGain) return;
+  rainGain.gain.setTargetAtTime(on && !muted ? 0.045 : 0, audioContext.currentTime, 0.5);
 }
 
 export function isMuted() {
@@ -71,10 +114,14 @@ export function startAmbience() {
   ambienceTimer = setInterval(() => {
     if (muted) return;
     ambienceStep += 1;
+    // Rain makes the warung quieter: the melody plays half as often
+    // and softer, so the rain patter carries the mood.
+    if (rainOn && ambienceStep % 2 === 0) return;
+    const volume = rainOn ? 0.02 : 0.035;
     // A slow, wandering melody: mostly stepwise, sometimes a rest.
     const note = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)];
-    tone(note, 0.9, 'sine', 0.035);
-    if (ambienceStep % 3 === 0) tone(note / 2, 1.4, 'sine', 0.02);
+    tone(note, 0.9, 'sine', volume);
+    if (ambienceStep % 3 === 0) tone(note / 2, 1.4, 'sine', volume * 0.6);
     if (ambienceStep % 4 === 0) noiseBurst(0.5, 0.012, 500); // soft chatter
   }, 900);
 }

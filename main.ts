@@ -1,4 +1,4 @@
-// Dapur Kilat — Warung Rush: the entry program (Node 22, stdlib only).
+// The Last Wok: the entry program (Node 22, stdlib only).
 // It hands the game in: copies game/ and screenshots/ from beside this
 // file into /output and writes /output/dossier.json with the vendored
 // make.fun library, exactly as the bounty asks. Outside the grader,

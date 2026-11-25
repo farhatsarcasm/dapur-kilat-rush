@@ -1,4 +1,4 @@
-// Dapur Kilat — small canvas drawings: every ingredient, customer faces,
+// The Last Wok — small canvas drawings: every ingredient, customer faces,
 // the chef and the Head Chef AI robot. All art is drawn in code: no image files,
 // no network requests, nothing to download.
 
@@ -81,6 +81,36 @@ export function drawIngredientIcon(ctx, draw, x, y, r, color, accent) {
     ctx.beginPath(); ctx.moveTo(r * 0.1, -r * 0.5); ctx.lineTo(r * 0.45, -r * 0.95); ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.fillRect(-r * 0.3, -r * 0.2, r * 0.18, r * 0.18);
+  } else if (draw === 'coffee') {
+    // Small cup of black coffee, steam curling up.
+    ctx.fillStyle = '#4e342e';
+    ctx.beginPath(); ctx.moveTo(-r * 0.5, -r * 0.2); ctx.lineTo(r * 0.5, -r * 0.2); ctx.lineTo(r * 0.35, r * 0.55); ctx.lineTo(-r * 0.35, r * 0.55); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = '#3e2723'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(r * 0.55, r * 0.1, r * 0.22, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-r * 0.15, -r * 0.35); ctx.quadraticCurveTo(r * 0.1, -r * 0.6, -r * 0.05, -r * 0.85); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(r * 0.2, -r * 0.35); ctx.quadraticCurveTo(r * 0.4, -r * 0.6, r * 0.3, -r * 0.85); ctx.stroke();
+  } else if (draw === 'avocado') {
+    // Halved avocado: green skin, pale flesh, brown pit.
+    ctx.fillStyle = '#558b2f';
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.55, r * 0.75, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#c5e1a5';
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.42, r * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#6d4c41';
+    ctx.beginPath(); ctx.arc(0, r * 0.15, r * 0.22, 0, Math.PI * 2); ctx.fill();
+  } else if (draw === 'satay') {
+    // Two satay skewers: sticks with grilled meat cubes, char marks.
+    ctx.strokeStyle = '#d7ccc8'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-r * 0.6, -r * 0.7); ctx.lineTo(r * 0.6, r * 0.7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(r * 0.6, -r * 0.7); ctx.lineTo(-r * 0.6, r * 0.7); ctx.stroke();
+    ctx.fillStyle = '#a0662c';
+    for (const [cx, cy] of [[-0.3, -0.35], [0.05, 0], [0.35, 0.3], [0.3, -0.35], [-0.05, 0], [-0.35, 0.3]]) {
+      ctx.beginPath(); ctx.arc(cx * r, cy * r, r * 0.26, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#5d4037';
+      ctx.beginPath(); ctx.arc(cx * r - r * 0.06, cy * r - r * 0.06, r * 0.07, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#a0662c';
+    }
   }
   ctx.restore();
 }
@@ -94,6 +124,12 @@ export function drawCustomerFace(ctx, customer, x, y, r, mood) {
   ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = customer.shirt;
   ctx.beginPath(); ctx.arc(0, -r * 0.95, r * 0.55, 0, Math.PI); ctx.fill();
+  // Mr Harto's black peci cap — so the cheerful old couple never reads
+  // as the Grumpys in the code-drawn fallback either.
+  if ((customer.name || '').startsWith('Mr Harto')) {
+    ctx.fillStyle = '#212121';
+    ctx.beginPath(); ctx.arc(0, -r * 0.98, r * 0.48, Math.PI, 0); ctx.fill();
+  }
   ctx.fillStyle = '#222';
   ctx.beginPath(); ctx.arc(-r * 0.35, -r * 0.1, r * 0.09, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(r * 0.35, -r * 0.1, r * 0.09, 0, Math.PI * 2); ctx.fill();

@@ -1,4 +1,4 @@
-// Dapur Kilat — Head Chef AI, the strict head chef.
+// The Last Wok — Head Chef AI, the strict head chef.
 // A visible, rule-based in-game AI agent: no network, no API calls, no
 // external model. It reads the order tickets, their patience, the prep
 // stations and the plate, then suggests the single most urgent next step.
@@ -12,7 +12,7 @@ export function createKoki() {
   return {
     enabled: true,
     text: '',
-    target: null, // { kind: 'ingredient'|'ready'|'plate'|'order', id }
+    target: null, // { kind: 'ingredient'|'plate'|'order'|'station', id }
     sequence: [],
   };
 }
@@ -32,6 +32,13 @@ export function updateKoki(state) {
   if (!koki.enabled || state.screen !== 'playing') {
     koki.text = '';
     koki.target = null;
+    koki.sequence = [];
+    return;
+  }
+  // Chef AI cheers a good serve first — praise beats the next instruction.
+  if (state.kokiPraise && state.kokiPraise.timer > 0) {
+    koki.text = state.kokiPraise.text;
+    koki.target = { kind: 'plate' };
     koki.sequence = [];
     return;
   }
@@ -68,20 +75,15 @@ export function updateKoki(state) {
   const nextId = missing[0];
   const next = ingredientById(nextId);
   const inPrep = state.prepSlots.wajan.some((p) => p.ingredientId === nextId)
-    || state.prepSlots.talenan.some((p) => p.ingredientId === nextId);
-  const isReady = state.readyTray.includes(nextId);
+    || state.prepSlots.talenan.some((p) => p.ingredientId === nextId)
+    || state.prepSlots.grill.some((p) => p.ingredientId === nextId);
 
-  if (isReady) {
-    koki.text = `${scold}${grumpyWarn}${next.name} is ready — put it on the plate, quick!`;
-    koki.target = { kind: 'ready', id: nextId };
-    return;
-  }
   if (inPrep) {
     // While it cooks, point at the next missing ingredient instead.
     const later = missing.find((id) => id !== nextId
       && !state.prepSlots.wajan.some((p) => p.ingredientId === id)
       && !state.prepSlots.talenan.some((p) => p.ingredientId === id)
-      && !state.readyTray.includes(id));
+      && !state.prepSlots.grill.some((p) => p.ingredientId === id));
     if (later) {
       const laterIngredient = ingredientById(later);
       koki.text = `${next.name} is cooking — get ${laterIngredient.name} ready too, don't just stand around!`;
@@ -92,13 +94,17 @@ export function updateKoki(state) {
     koki.target = { kind: 'station', id: next.station };
     return;
   }
-  const stationName = next.station === 'wajan' ? 'wok' : 'chopping board';
+  const stationName = next.station === 'wajan' ? 'wok' : next.station === 'grill' ? 'grill' : 'chopping board';
   koki.text = `${scold}${grumpyWarn}Cook ${next.name} in the ${stationName} first! Move!`;
   koki.target = { kind: 'ingredient', id: nextId };
 }
 
 function selectedOrderForKoki(state) {
   const selected = state.orders.find((order) => order.id === state.selectedOrderId);
-  if (selected) return selected;
+  if (selected && selected.taken) return selected;
+  // Prefer a taken order in trouble; an untaken order cannot be cooked
+  // for yet, so it only counts if nothing is taken.
+  const taken = state.orders.filter((order) => order.taken);
+  if (taken.length) return mostUrgentOrder({ orders: taken });
   return mostUrgentOrder(state);
 }
